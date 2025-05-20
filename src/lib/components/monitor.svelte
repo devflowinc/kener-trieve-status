@@ -60,13 +60,14 @@
       {
         label: "Latency (ms)",
         data: [] as number[],
-        borderColor: "#3b82f6",
+        borderColor: "#e12afb",
         tension: 0.4
       }
     ]
   };
 
   let latencyDataMap: Record<string, number> = {};
+  let averageLatency = 0;
 
   let latencyChartOptions = {
     responsive: true,
@@ -93,22 +94,9 @@
         }
       },
       x: {
-        title: {
-          display: true,
-          text: "Time",
-          color: "#64748b",
-          font: {
-            size: 12
-          }
-        },
+        display: false,
         grid: {
-          color: "rgba(100, 116, 139, 0.1)"
-        },
-        ticks: {
-          color: "#64748b",
-          font: {
-            size: 11
-          }
+          display: false
         }
       }
     },
@@ -314,8 +302,19 @@
       const latencies = timestamps.map((ts) => data[ts].latency);
       const formattedLabels = timestamps.map((ts) => f(new Date(parseInt(ts) * 1000), "HH:mm", selectedLang, localTz));
 
+      // Calculate average latency
+      averageLatency = latencies.reduce((sum, val) => sum + val, 0) / latencies.length;
+
       // Create a map for quick latency lookups
       latencyDataMap = Object.fromEntries(timestamps.map((ts) => [ts, data[ts].latency]));
+
+      // Update monitor's pageData with latency information
+      monitor.pageData = {
+        ...monitor.pageData,
+        latencyData: {
+          latency: averageLatency
+        }
+      };
 
       latencyData = {
         labels: formattedLabels,
@@ -323,7 +322,7 @@
           {
             label: "Latency (ms)",
             data: latencies,
-            borderColor: "#3b82f6",
+            borderColor: "#e12afb",
             tension: 0.4
           }
         ]
@@ -547,8 +546,8 @@
                         <p class="pl-2">-</p>
                       {/if}
                       {#if latencyDataMap[bar.timestamp]}
-                        <p class="pl-2 text-blue-400">
-                          Latency: {latencyDataMap[bar.timestamp].toFixed(2)}ms
+                        <p class="pl-2">
+                          Latency: <span class="text-fuchsia-500">{latencyDataMap[bar.timestamp].toFixed(2)}ms</span>
                         </p>
                       {/if}
                     </div>
@@ -576,8 +575,13 @@
       </Button>
 
       {#if showLatencyGraph}
-        <div class="mt-2 h-[200px] w-full rounded-md border bg-card p-2">
-          <Line data={latencyData} options={latencyChartOptions} />
+        <div class="mt-2 flex flex-col items-center justify-between rounded-md border bg-card p-2">
+          <div class="text-xs font-medium">
+            Average Latency: <span class="text-fuchsia-500">{averageLatency.toFixed(2)}ms</span>
+          </div>
+          <div class="h-[150px] w-full">
+            <Line data={latencyData} options={latencyChartOptions} />
+          </div>
         </div>
       {/if}
     </div>
