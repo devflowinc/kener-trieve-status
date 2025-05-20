@@ -250,6 +250,7 @@
   onMount(async () => {
     scrollToRight();
     loadIncidents();
+    loadLatencyData();
   });
   afterUpdate(() => {
     dispatch("heightChange", {});
@@ -427,8 +428,16 @@
               suffix="%"
             />
           {/if}
-          <div class="truncate text-xs font-semibold text-{monitor.pageData.summaryColorClass}">
-            {monitor.pageData.summaryStatus}
+          <div class="flex flex-row gap-2 truncate text-xs font-semibold">
+            <div>
+              Average Latency: <span class="text-fuchsia-500">{averageLatency.toFixed(2)}ms</span>
+            </div>
+            <div class="font-thin text-muted-foreground">|</div>
+            <div>
+              <span class="text-xs font-semibold text-{monitor.pageData.summaryColorClass}">
+                {monitor.pageData.summaryStatus}
+              </span>
+            </div>
           </div>
         </div>
       </div>
