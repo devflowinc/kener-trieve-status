@@ -43,6 +43,8 @@ services:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}   # Best to define this in `.env` or via Docker Secret!!
       POSTGRES_DB: kener_db
+    volumes:
+      - data:/var/lib/postgresql/data
     restart: unless-stopped
 
   # Only use below section if you would like to utilize MySQL instead of Kener's default SQLite database. (Don't forget to set `DATABASE_URL` in `kener` service to be: `DATABASE_URL=mysql://db_user:db_password@localhost:3306/kener_db`)
