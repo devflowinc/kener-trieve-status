@@ -106,6 +106,7 @@ WORKDIR /app
 # Copy package files build artifacts, and necessary files from builder stage
 COPY --chown=node:node --from=builder /app/src/lib/ ./src/lib/
 COPY --chown=node:node --from=builder /app/build ./build
+COPY --chown=node:node --from=builder /app/src/lib/server/templates ./build/server/templates
 COPY --chown=node:node --from=builder /app/uploads ./uploads
 COPY --chown=node:node --from=builder /app/database ./database
 # TODO: Consider changing from copying `node_modules` to instead letting `npm ci --omit=dev` handle production dependencies. Right now, copying `node_modules` is leading to a smaller image, whereas letting `npm ci` handle the install in final image is slightly faster, but leads to larger image size. IMO, having a slightly longer build time (e.g. ~10 sec.) is better in the end to have a smaller image.
