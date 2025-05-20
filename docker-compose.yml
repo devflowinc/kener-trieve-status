@@ -4,8 +4,6 @@
 # Docker Compose Version: 3.8
 # Notes: Ensure that you specify a random value for the `KENER_SECRET_KEY` environment variable before running `docker-compose up -d`.
 
-version: '3.8'
-
 services:
   kener:
     image: rajnandan1/kener:latest      # Change to 'rajnandan1/kener:alpine' for an even smaller image! 😁🚀
@@ -37,15 +35,15 @@ services:
 
   # Only use below section if you would like to utilize PostgreSQL instead of Kener's default SQLite database. (Don't forget to set `DATABASE_URL` in `kener` service to be: `DATABASE_URL=postgresql://db_user:db_password@localhost:5432/kener_db`)
   postgres:
-    image: postgres:alpine
-    container_name: postgres
+    image: postgres:15
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}   # Best to define this in `.env` or via Docker Secret!!
       POSTGRES_DB: kener_db
     volumes:
-      - data:/var/lib/postgresql/data
-    restart: unless-stopped
+      - pgdata:/var/lib/postgresql/data
+    
+    restart: always
 
   # Only use below section if you would like to utilize MySQL instead of Kener's default SQLite database. (Don't forget to set `DATABASE_URL` in `kener` service to be: `DATABASE_URL=mysql://db_user:db_password@localhost:3306/kener_db`)
   mysql:
@@ -60,4 +58,5 @@ services:
 
 volumes:
   data:
-    name: kener_db
+    name: kener_local
+  pgdata:
