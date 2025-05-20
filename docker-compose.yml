@@ -27,9 +27,9 @@ services:
       # NODE_ENV: production            # This is already set to "production" by default within the container
     ports:
       - '3000:3000/tcp'
-    volumes:
-      - data:/app/database              # We suggest using a Docker named volume, which is more performant for databases
-      - ./uploads:/app/uploads
+    # volumes:
+      # - data:/app/database              # We suggest using a Docker named volume, which is more performant for databases
+      # - ./uploads:/app/uploads
     # read_only: true                   # Uncommenting this fortifies security by marking the container's filesystem as read-only (aka no data can be written to the container's filesystem except for explicitly defined writable volumes and bind mounts, an exception has already been defined for `/database` and `/uploads`)
     restart: unless-stopped
     depends_on:                       #  <-- Uncomment if you would like to use PostgreSQL or MySQL
@@ -60,6 +60,6 @@ services:
     restart: unless-stopped
 
 volumes:
-  data:
-    name: kener_local
+  # data:
+  #   name: kener_local
   pgdata:
