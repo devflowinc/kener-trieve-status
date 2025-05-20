@@ -13,7 +13,7 @@ services:
     # env_file: custom.env              # Uncomment this if you are needing to export environment variables from a custom environment file. By default, Docker will import any variables that exist in `.env`
     environment:
       TZ: Etc/UTC
-      KENER_SECRET_KEY: woah_kener_and_trieve_are_really_cool   # Keep private!! - best to define in `.env` file or through Docker Secret
+      KENER_SECRET_KEY: ${KENER_SECRET_KEY}   # Keep private!! - best to define in `.env` file or through Docker Secret
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/kener_db     # By default, a SQLite database is used - you may override the database url/type here
       # RESEND_API_KEY: 
       # RESEND_SENDER_EMAIL: 
