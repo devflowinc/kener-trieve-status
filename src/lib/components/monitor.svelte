@@ -5,7 +5,6 @@
   import { Button } from "$lib/components/ui/button";
   import * as DropdownMenu from "$lib/components/ui/dropdown-menu";
   import { base } from "$app/paths";
-  import { sub, startOfDay, getUnixTime } from "date-fns";
   import GMI from "$lib/components/gmi.svelte";
   import { page } from "$app/stores";
   import { analyticsEvent } from "$lib/boringOne";
@@ -14,9 +13,6 @@
   import Settings from "lucide-svelte/icons/settings";
   import TrendingUp from "lucide-svelte/icons/trending-up";
   import Loader from "lucide-svelte/icons/loader";
-  import ChevronLeft from "lucide-svelte/icons/chevron-left";
-  import ChevronRight from "lucide-svelte/icons/chevron-right";
-  import { buttonVariants } from "$lib/components/ui/button";
   import { createEventDispatcher } from "svelte";
   import { afterUpdate } from "svelte";
   import axios from "axios";
@@ -43,7 +39,7 @@
   let incidents: Record<string, any> = {};
   let dayIncidentsFull: any[] = [];
   let homeDataMaxDays = monitor.pageData.homeDataMaxDays;
-  let showLatencyGraph = false;
+  let showLatencyGraph = true;
   let dimension = {
     x1: 6,
     x2: 4
@@ -65,6 +61,35 @@
       }
     ]
   };
+
+  function interpolatePoints(points: number[], steps: number = 5): number[] {
+    const result: number[] = [];
+    for (let i = 0; i < points.length - 1; i++) {
+      const start = points[i];
+      const end = points[i + 1];
+      result.push(start);
+
+      for (let j = 1; j < steps; j++) {
+        const t = j / steps;
+        const interpolated = start + (end - start) * t;
+        result.push(interpolated);
+      }
+    }
+    result.push(points[points.length - 1]);
+    return result;
+  }
+
+  function interpolateLabels(labels: string[], steps: number = 5): string[] {
+    const result: string[] = [];
+    for (let i = 0; i < labels.length - 1; i++) {
+      result.push(labels[i]);
+      for (let j = 1; j < steps; j++) {
+        result.push("");
+      }
+    }
+    result.push(labels[labels.length - 1]);
+    return result;
+  }
 
   let latencyDataMap: Record<string, number> = {};
   let averageLatency = 0;
@@ -298,18 +323,14 @@
       });
       const data: Record<string, LatencyDataPoint> = await response.json();
 
-      // Process data for chart
       const timestamps = Object.keys(data).sort();
       const latencies = timestamps.map((ts) => data[ts].latency);
       const formattedLabels = timestamps.map((ts) => f(new Date(parseInt(ts) * 1000), "HH:mm", selectedLang, localTz));
 
-      // Calculate average latency
       averageLatency = latencies.reduce((sum, val) => sum + val, 0) / latencies.length;
 
-      // Create a map for quick latency lookups
       latencyDataMap = Object.fromEntries(timestamps.map((ts) => [ts, data[ts].latency]));
 
-      // Update monitor's pageData with latency information
       monitor.pageData = {
         ...monitor.pageData,
         latencyData: {
@@ -317,19 +338,23 @@
         }
       };
 
+      const smoothedLatencies = interpolatePoints(latencies);
+      const smoothedLabels = interpolateLabels(formattedLabels);
+
       latencyData = {
-        labels: formattedLabels,
+        labels: smoothedLabels,
         datasets: [
           {
             label: "Latency (ms)",
-            data: latencies,
+            data: smoothedLatencies,
             borderColor: "#e12afb",
-            tension: 0.4
+            tension: 0.8,
+            pointRadius: 0,
+            borderWidth: 2
           }
         ]
       };
 
-      // If latency graph is visible, update it
       if (showLatencyGraph) {
         latencyData = { ...latencyData };
       }
